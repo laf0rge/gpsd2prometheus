@@ -14,21 +14,69 @@ var (
 	gpsMode = promauto.NewGauge(
 		prometheus.GaugeOpts {
 			Subsystem:	"gpsd",
-			Name: 		"mode",
-			Help:		"gpsd mode (2=2D fix, 3=3D fix)",
+			Name: 		"fix_mode",
+			Help:		"gpsd mode (0=NoValueSeen, 1=NoFix, 2=2D fix, 3=3D fix)",
 		})
 
 	gpsNumSats = promauto.NewGauge(
 		prometheus.GaugeOpts {
 			Subsystem:	"gpsd",
-			Name:		"num_sv_total",
+			Name:		"space_vehicles_total",
 			Help:		"Total number of SV",
 		})
+
 	gpsNumSatsUsed = promauto.NewGauge(
 		prometheus.GaugeOpts {
 			Subsystem:	"gpsd",
-			Name:		"num_sv_used",
+			Name:		"space_vehicles_used",
 			Help:		"Used number of SV",
+		})
+
+	gpsSvSs = promauto.NewGaugeVec(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"space_vehicle_signal_strength",
+			Help:		"Per-SV signal strength",
+		},
+		[]string{
+			"prn",
+		},
+	)
+
+	gpsXdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"xdop",
+		})
+	gpsYdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"ydop",
+		})
+	gpsVdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"vdop",
+		})
+	gpsTdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"tdop",
+		})
+	gpsHdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"hdop",
+		})
+	gpsPdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"pdop",
+		})
+	gpsGdop = promauto.NewGauge(
+		prometheus.GaugeOpts {
+			Subsystem:	"gpsd",
+			Name:		"gdop",
 		})
 )
 
@@ -56,11 +104,21 @@ func main() {
 	gps.AddFilter("SKY", func(r interface{}) {
 		sky := r.(*gpsd.SKYReport)
 		fmt.Println("SKY", sky.Satellites)
-		gpsNumSats.Set(float64(len(sky.Satellites)))
+		gpsXdop.Set(sky.Xdop)
+		gpsYdop.Set(sky.Ydop)
+		gpsVdop.Set(sky.Vdop)
+		gpsTdop.Set(sky.Tdop)
+		gpsHdop.Set(sky.Hdop)
+		gpsPdop.Set(sky.Pdop)
+		gpsGdop.Set(sky.Gdop)
 
+		gpsNumSats.Set(float64(len(sky.Satellites)))
+		gpsSvSs.Reset()
 		num_sats_used := 0
 		for i := 0; i < len(sky.Satellites); i++ {
 			num_sats_used += 1
+			prn_str := fmt.Sprintf("%.0f", sky.Satellites[i].PRN)
+			gpsSvSs.WithLabelValues(prn_str).Set(sky.Satellites[i].Ss)
 		}
 		gpsNumSatsUsed.Set(float64(num_sats_used))
 	})
