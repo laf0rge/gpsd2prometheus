@@ -1,4 +1,4 @@
-module laf0rge/gps2prom
+module laf0rge/gpsd2prometheus
 
 go 1.19
 
