@@ -33,7 +33,12 @@ scrape_configs:
       - targets: ['hostname:2112']
 ```
 
+Grafana
+-------
+
 There's a [sample grafana dashboard](grafana-dashboard/gps_receiver.json)
+
+![sample grafana dashboard](grafana-dashboard/grafana-gpsd-dashboard.png?raw=true "grafana dashboard for gpsd")
 
 Credits
 -------
