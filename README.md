@@ -20,6 +20,20 @@ Usage of gpsd2prometheus:
         local HTTP listen host:port (default ":2112")
 ```
 
+So you simply run the gpsd2prometheus somewhere and
+
+* point it to the TCP host/port of the gpsd socket
+* tell it on which HTTP port to listen for prometheus to scrape
+* configure prometheus to actually scrape with a section as stated below
+
+```
+scrape_configs:
+  - job_name: gpsd
+    static_configs:
+      - targets: ['hostname:2112']
+```
+
+There's a [sample grafana dashboard](grafana-dashboard/gps_receiver.json)
 
 Credits
 -------
@@ -38,4 +52,4 @@ License
 I'm usually much more in favor of copyleft licenses, but given the two
 libraries I use are MIT and Apache 2.0, I decided to go for a permissive
 license in this project, too.  So the code is released under Apache 2.0,
-see the COPYING file for details.
+see the [COPYING](COPYING) file for details.
